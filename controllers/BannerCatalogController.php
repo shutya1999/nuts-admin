@@ -1,20 +1,23 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: romai
+ * Date: 27.07.2021
+ * Time: 12:46
+ */
 
 namespace app\controllers;
 
 use Yii;
-use app\models\Product;
-use app\models\ProductSearch;
+use app\models\BannerCatalog;
+use yii\data\ActiveDataProvider;
 use app\controllers\AppAdminController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\helpers\Html;
 use yii\helpers\Json;
-use yii\filters\AccessControl;
-/**
- * ProductController implements the CRUD actions for Product model.
- */
-class ProductController extends AppAdminController
+
+
+class BannerCatalogController extends AppAdminController
 {
     /**
      * {@inheritdoc}
@@ -28,40 +31,26 @@ class ProductController extends AppAdminController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['login'],
-                        'roles' => ['?'],
-                    ],
-                    [
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
         ];
     }
 
     /**
-     * Lists all Product models.
+     * Lists all BannerCatalog models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ProductSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = new ActiveDataProvider([
+            'query' => BannerCatalog::find(),
+        ]);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single Product model.
+     * Displays a single BannerCatalog model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -74,16 +63,15 @@ class ProductController extends AppAdminController
     }
 
     /**
-     * Creates a new Product model.
+     * Creates a new BannerCatalog model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Product();
+        $model = new BannerCatalog();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -93,7 +81,7 @@ class ProductController extends AppAdminController
     }
 
     /**
-     * Updates an existing Product model.
+     * Updates an existing BannerCatalog model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -104,7 +92,6 @@ class ProductController extends AppAdminController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Продукт оновлено');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -113,9 +100,8 @@ class ProductController extends AppAdminController
         ]);
     }
 
-
     /**
-     * Deletes an existing Product model.
+     * Deletes an existing BannerCatalog model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -123,62 +109,74 @@ class ProductController extends AppAdminController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $slides = $this->findModel($id);
+
+        $dir = '/www/nuts-city.yh-web.space/web/img/banner-catalog/';
+
+        if (ftp_delete($this->connectFTP(), $dir . $slides->desktop) &&
+            ftp_delete($this->connectFTP(), $dir . $slides->tablet) &&
+            ftp_delete($this->connectFTP(), $dir . $slides->mobile)){
+            $this->findModel($id)->delete();
+            Yii::$app->session->setFlash('success', 'Банер видалено');
+        }else{
+            Yii::$app->session->setFlash('error', 'Виникла помилка при видаленні банеру');
+        }
 
         return $this->redirect(['index']);
     }
 
-//    public function actionUploadImg()
-//    {
-//        $model = new UploadsFiles();
-//
-//        if(Yii::$app->request->isAjax){
-//            $model->imagesFile = UploadedFile::getInstance($model, 'imagesFile');
-//            if($model->upload()){
-//                $model->load(Yii::$app->request->post());
-//                $model->saveImg();
-//                $answer['initialPreview'] = $model->getImagesLinks();
-//                $answer['initialPreviewData'] = $model->getImagesLinksData();
-//                return json_encode($answer);
-//            }
-//        }
-//        return false;
-//    }
+    /**
+     * Finds the BannerCatalog model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return BannerCatalog the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = BannerCatalog::findOne($id)) !== null) {
+            return $model;
+        }
 
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
 
-    public function actionDelImg($path, $name){
-        $dir = '/www/nuts-city.yh-web.space/web/img/product/' . $path;
-
+    public function connectFTP(){
         $ftp_server = 'leaf.cityhost.com.ua';
         $ftp_user_name = 'ch2e38aa18';
         $ftp_user_pass = 'a9c3ec2cc8';
-        // установка соединения
         $conn_id = ftp_connect($ftp_server);
-        // вход с именем пользователя и паролем
         $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
 
+        return $conn_id;
+    }
 
+    public function delPhoto($file){
+        $tmp = '/www/nuts-city.yh-web.space/web/img/banner-catalog/' . $file;
+        ftp_delete($this->connectFTP(), $tmp);
+    }
+
+    public function actionDelImg($file, $id){
+        $dir = '/www/nuts-city.yh-web.space/web/img/banner-catalog/' . $file;
+
+        $conn_id = $this->connectFTP();
         if (ftp_delete($conn_id, $dir)){
+            $banner = BannerCatalog::findOne($id);
+
+            if ($banner->desktop == $file){
+                $banner->desktop = null;
+            }elseif($banner->tablet == $file){
+                $banner->tablet = null;
+            }elseif($banner->mobile == $file){
+                $banner->mobile = null;
+            }
+
+            $banner->save();
+
             return Json::encode('success');
         }else{
             return Json::encode('Error');
         }
 
-    }
-
-    /**
-     * Finds the Product model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Product the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Product::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

@@ -241,7 +241,7 @@ class Product extends \yii\db\ActiveRecord
 
                 $test[] = [
                     'key' => $image['name'],
-                    'url' => $model->url . '/' . $image['name']
+                    'url' => $model->url . '/' . $image['name'],
                 ];
             }
         }

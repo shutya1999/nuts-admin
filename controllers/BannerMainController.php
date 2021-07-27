@@ -2,19 +2,18 @@
 
 namespace app\controllers;
 
-use app\models\CategorySearch;
 use Yii;
-use app\models\Category;
+use app\models\BannerMain;
+use yii\data\ActiveDataProvider;
 use app\controllers\AppAdminController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-
+use yii\helpers\Json;
 
 /**
- * CategoryController implements the CRUD actions for Category model.
+ * BannerMainController implements the CRUD actions for BannerMain model.
  */
-class CategoryController extends AppAdminController
+class BannerMainController extends AppAdminController
 {
     /**
      * {@inheritdoc}
@@ -28,40 +27,26 @@ class CategoryController extends AppAdminController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['login'],
-                        'roles' => ['?'],
-                    ],
-                    [
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
         ];
     }
 
     /**
-     * Lists all Category models.
+     * Lists all BannerMain models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new CategorySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = new ActiveDataProvider([
+            'query' => BannerMain::find(),
+        ]);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single Category model.
+     * Displays a single BannerMain model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -74,16 +59,15 @@ class CategoryController extends AppAdminController
     }
 
     /**
-     * Creates a new Category model.
+     * Creates a new BannerMain model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Category();
+        $model = new BannerMain();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Категорію додано');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -93,7 +77,7 @@ class CategoryController extends AppAdminController
     }
 
     /**
-     * Updates an existing Category model.
+     * Updates an existing BannerMain model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -104,7 +88,6 @@ class CategoryController extends AppAdminController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Категорію оновлено');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -114,7 +97,7 @@ class CategoryController extends AppAdminController
     }
 
     /**
-     * Deletes an existing Category model.
+     * Deletes an existing BannerMain model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -122,26 +105,74 @@ class CategoryController extends AppAdminController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $slides = $this->findModel($id);
 
-        Yii::$app->session->setFlash('success', 'Категорію видалено');
+        $dir = '/www/nuts-city.yh-web.space/web/img/banner-main/';
+
+        if (ftp_delete($this->connectFTP(), $dir . $slides->desktop) &&
+            ftp_delete($this->connectFTP(), $dir . $slides->tablet) &&
+            ftp_delete($this->connectFTP(), $dir . $slides->mobile)){
+            $this->findModel($id)->delete();
+            Yii::$app->session->setFlash('success', 'Банер видалено');
+        }else{
+            Yii::$app->session->setFlash('error', 'Виникла помилка при видаленні банеру');
+        }
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Category model based on its primary key value.
+     * Finds the BannerMain model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Category the loaded model
+     * @return BannerMain the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Category::findOne($id)) !== null) {
+        if (($model = BannerMain::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function connectFTP(){
+        $ftp_server = 'leaf.cityhost.com.ua';
+        $ftp_user_name = 'ch2e38aa18';
+        $ftp_user_pass = 'a9c3ec2cc8';
+        $conn_id = ftp_connect($ftp_server);
+        $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+
+        return $conn_id;
+    }
+
+    public function delPhoto($file){
+        $tmp = '/www/nuts-city.yh-web.space/web/img/banner-main/' . $file;
+        ftp_delete($this->connectFTP(), $tmp);
+    }
+
+    public function actionDelImg($file, $id){
+        $dir = '/www/nuts-city.yh-web.space/web/img/banner-main/' . $file;
+
+        $conn_id = $this->connectFTP();
+        if (ftp_delete($conn_id, $dir)){
+            $banner = BannerMain::findOne($id);
+
+            if ($banner->desktop == $file){
+                $banner->desktop = null;
+            }elseif($banner->tablet == $file){
+                $banner->tablet = null;
+            }elseif($banner->mobile == $file){
+                $banner->mobile = null;
+            }
+
+            $banner->save();
+
+            return Json::encode('success');
+        }else{
+            return Json::encode('Error');
+        }
+
     }
 }

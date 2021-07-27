@@ -178,8 +178,20 @@ window.onload = function () {
                 <label class="control-label" for="price-10">Ціна за 10 штук</label>
                 <input type="number" id="price-10" class="form-control" name="price_200" data-volume = "10" autocomplete="off">
             </div>
-        `
+        `,
+        box: `
+            <div class="form-group _price col-md-3" >
+                <label class="control-label" for="price-1">Ціна за стандартну коробку</label>
+                <input type="number" id="price-1" class="form-control" name="price_200" data-title = "Стандарт (Картонна)" data-volume="1" autocomplete="off">
+            </div>
+            <div class="form-group _price col-md-3" >
+                <label class="control-label" for="price-2">Ціна за преміум коробку</label>
+                <input type="number" id="price-2" class="form-control" name="price_200" data-title = "Преміум (Дерев'яна)" data-volume="2" autocomplete="off">
+            </div>
+        `,
     }
+
+    let form = document.querySelector('#form-product');
 
 
     let labelVolume = document.querySelectorAll(".form-check-label"),
@@ -193,110 +205,138 @@ window.onload = function () {
         item.addEventListener("click", activeVolume)
     })
 
-    let volume_type = document.querySelector('input[name="volume-type"]:checked').id;
-    let volume = volumeContent.children;
-    let test = '';
-    for (let i = 0; i < volume.length; i++){
-        test += volume[i].outerHTML;
-    }
-    volumeData[volume_type] = test;
-
-    function activeVolume(){
+    console.log(window.location.pathname);
+    
+    if (window.location.pathname.indexOf('product') !== -1){
         let volume_type = document.querySelector('input[name="volume-type"]:checked').id;
 
-        volumeContent.innerHTML = volumeData[volume_type];
-        price(volume_type);
-    }
-    activeVolume();
-
-    function price(volume_type) {
-        let fieldsPrice = document.querySelectorAll("._price input"),
-            inputRes = document.querySelector("#product-option"),
-            form = document.querySelector('#form-product');
-
-        console.log(form);
-
-        form.addEventListener('submit', function () {
-            console.log("1");
-            if (valid()){
-                console.log("2");
-                inputRes.value = generatePrice();
-                form.submit();
-            }else {
-                //console.log("Huy")
-            }
-        });
-
-        fieldsPrice.forEach(input => {
-            input.addEventListener('input', function () {
-                if (input.value == ''){
-                    input.closest(".form-group").classList.add("has-error");
-                }else {
-                    input.closest(".form-group").classList.remove("has-error");
-                }
-            })
-        })
-
-        function valid(){
-            console.log("valid");
-            // let count = fieldsPrice.length;
-            let i = 0;
-            fieldsPrice.forEach(input => {
-                if (input.value == ''){
-                    input.closest(".form-group").classList.add("has-error");
-                }else {
-                    input.closest(".form-group").classList.remove("has-error");
-                    i++;
-                }
-            })
-            if (fieldsPrice.length ===  i){
-                return true;
-            } else {
-                return false;
-            }
+        let volume = volumeContent.children;
+        // console.log(volume);
+        let test = '';
+        for (let i = 0; i < volume.length; i++){
+            test += volume[i].outerHTML;
         }
+        volumeData[volume_type] = test;
 
-        function generatePrice() {
-            let price = [];
-            let sale = +document.querySelector("#product-sale").value;
-            // console.log(sale);
-            if (sale !== 0){
+        function activeVolume(){
+            let volume_type = document.querySelector('input[name="volume-type"]:checked').id;
+
+            volumeContent.innerHTML = volumeData[volume_type];
+            price(volume_type);
+        }
+        activeVolume();
+
+        function price(volume_type) {
+            let fieldsPrice = document.querySelectorAll("._price input"),
+                inputRes = document.querySelector("#product-option");
+
+
+            console.log(volume_type);
+
+            form.addEventListener('submit', function () {
+                // console.log(form);
+                if (valid()){
+                    // console.log("2");
+                    inputRes.value = generatePrice();
+                    form.submit();
+                }else {
+                    //console.log("Huy")
+                }
+            });
+
+            fieldsPrice.forEach(input => {
+                input.addEventListener('input', function () {
+                    if (input.value == ''){
+                        input.closest(".form-group").classList.add("has-error");
+                    }else {
+                        input.closest(".form-group").classList.remove("has-error");
+                    }
+                })
+            })
+
+            function valid(){
+                // console.log("valid");
+                // let count = fieldsPrice.length;
+                let i = 0;
                 fieldsPrice.forEach(input => {
-                    price.push({
-                        quantity: input.dataset.volume,
-                        price: input.value,
-                        new_price: Math.floor(input.value - ((input.value * sale) / 100))
-                    })
-                });
-            }else {
-                fieldsPrice.forEach(input => {
-                    price.push({
-                        quantity: input.dataset.volume,
-                        price: input.value,
-                        new_price: 0
-                    })
-                });
+                    if (input.value == ''){
+                        input.closest(".form-group").classList.add("has-error");
+                    }else {
+                        input.closest(".form-group").classList.remove("has-error");
+                        i++;
+                    }
+                })
+                if (fieldsPrice.length ===  i){
+                    return true;
+                } else {
+                    return false;
+                }
             }
 
+            function generatePrice(volume) {
+                let price = [];
+                let sale = +document.querySelector("#product-sale").value;
 
-            switch (volume_type) {
-                case "grams":
-                    return JSON.stringify({["Грам"]: price});
-                    // break;
-                case "kilograms":
-                    return JSON.stringify({["Кілограм"]: price});
-                case "liters":
-                    return JSON.stringify({["Літр"]: price});
-                case "count":
-                    return JSON.stringify({["Штук"]: price});
+                if (volume_type === 'box'){
+                    if (sale !== 0){
+                        fieldsPrice.forEach(input => {
+                            price.push({
+                                quantity: input.dataset.volume,
+                                title: input.dataset.title,
+                                price: input.value,
+                                new_price: Math.floor(input.value - ((input.value * sale) / 100))
+                            })
+                        });
+                    }else {
+                        fieldsPrice.forEach(input => {
+                            price.push({
+                                quantity: input.dataset.volume,
+                                title: input.dataset.title,
+                                price: input.value,
+                                new_price: 0
+                            })
+                        });
+                    }
+                }else {
+                    if (sale !== 0){
+                        fieldsPrice.forEach(input => {
+                            price.push({
+                                quantity: input.dataset.volume,
+                                price: input.value,
+                                new_price: Math.floor(input.value - ((input.value * sale) / 100))
+                            })
+                        });
+                    }else {
+                        fieldsPrice.forEach(input => {
+                            price.push({
+                                quantity: input.dataset.volume,
+                                price: input.value,
+                                new_price: 0
+                            })
+                        });
+                    }
+                }
+
+                switch (volume_type) {
+                    case "grams":
+                        return JSON.stringify({["Грам"]: price});
+                    case "kilograms":
+                        return JSON.stringify({["Кілограм"]: price});
+                    case "liters":
+                        return JSON.stringify({["Літр"]: price});
+                    case "count":
+                        return JSON.stringify({["Штук"]: price});
+                    case "box":
+                        return JSON.stringify({["Box"]: price});
+                }
+
             }
-
         }
     }
 
 
     let delImg = document.querySelectorAll(".kv-file-remove");
-    //console.log(delImg);
+    console.log(delImg);
 
     delImg.forEach(del => {
         del.addEventListener('click', function () {
@@ -304,7 +344,18 @@ window.onload = function () {
             const path = del.dataset.url,
                   name = del.dataset.key;
 
+            console.log(path);
             let url = `/product/del-img?path=${path}&name=${name}`;
+
+            if (window.location.pathname.indexOf('banner-main') !== -1){
+                let formID = del.dataset.key;
+                url = `/banner-main/del-img?file=${path}&id=${formID}`;
+            }
+            if (window.location.pathname.indexOf('banner-catalog') !== -1){
+                let formID = del.dataset.key;
+                url = `/banner-catalog/del-img?file=${path}&id=${formID}`;
+            }
+
             let response = fetch(url)
                 .then(response => response.json())
                 .then(function (json) {

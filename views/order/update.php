@@ -16,11 +16,9 @@ $this->params['breadcrumbs'][] = 'Редагування замовлення';
         <div class="box">
             <div class="box-body">
                 <div class="order-update">
-
                     <?= $this->render('_form', [
                         'model' => $model,
                     ]) ?>
-
                 </div>
             </div>
         </div>

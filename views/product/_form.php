@@ -84,9 +84,26 @@ if(isset($model->option)){
                 ";
             }
             break;
+        case 'Box';
+            $res = "
+                <div class=\"form-group _price col-md-3\" >
+                    <label class=\"control-label\" for=\"price-1\">Ціна за стандартну коробку</label>
+                    <input type=\"number\" id=\"price-1\" class=\"form-control\" value = '{$options->Box[0]->price}'  name=\"price_200\" data-title = \"Стандарт (Картонна)\" data-volume = \"1\" autocomplete=\"off\">
+                </div>
+                <div class=\"form-group _price col-md-3\" >
+                    <label class=\"control-label\" for=\"price-2\">Ціна за преміум коробку</label>
+                    <input type=\"number\" id=\"price-2\" class=\"form-control\" value = '{$options->Box[1]->price}' name=\"price_200\" data-title = \"Преміум (Дерев'яна)\" data-volume = \"2\" autocomplete=\"off\">
+                </div>
+            ";
+            break;
     }
 
 }
+?>
+
+<?php
+//echo "<pre>";
+//var_dump($options->Box[0]->price);
 ?>
 
 <div class="product-form">
@@ -147,6 +164,12 @@ if(isset($model->option)){
                 <input class="form-check-input" type="radio" value="Штук" id="count" name="volume-type" <?= (isset($model->option) && key($options) == 'Штук') ? 'checked' : '' ?>>
                 <label class="form-check-label" for="count">
                     Штуки
+                </label>
+            </div>
+            <div class="form-check" >
+                <input class="form-check-input" type="radio" value="Штук" id="box" name="volume-type" <?= (isset($model->option) && key($options) == 'Box') ? 'checked' : '' ?>>
+                <label class="form-check-label" for="box">
+                    Коробка
                 </label>
             </div>
         </div>
@@ -299,7 +322,7 @@ if(isset($model->option)){
     <?//= $form->field($model, 'number_orders')->textInput() ?>
 
     <div class="form-group form-btn">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success col-md-3']) ?>
+        <?= Html::submitButton('Зберегти', ['class' => 'btn btn-success col-md-3']) ?>
     </div>
 
 

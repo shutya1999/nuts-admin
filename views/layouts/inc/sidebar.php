@@ -57,6 +57,36 @@
                     <li><a href="<?= \yii\helpers\Url::to(['product/create'])?>">Додати товар</a></li>
                 </ul>
             </li>
+            <li class="treeview">
+                <a href="<?= \yii\helpers\Url::to(['product/index'])?>"><i class="fa fa-picture-o">
+                    </i><span>Банер (Головна)</span>
+                    <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="<?= \yii\helpers\Url::to(['banner-main/index'])?>">Переглянути банери</a></li>
+                    <li><a href="<?= \yii\helpers\Url::to(['banner-main/create'])?>">Додати банер</a></li>
+                </ul>
+            </li>
+            <li class="treeview">
+                <a href="<?= \yii\helpers\Url::to(['product/index'])?>"><i class="fa fa-picture-o">
+                    </i><span>Банер (Каталог)</span>
+                    <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="<?= \yii\helpers\Url::to(['banner-catalog/index'])?>">Переглянути банери</a></li>
+                    <li><a href="<?= \yii\helpers\Url::to(['banner-catalog/create'])?>">Додати банер</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="<?= \yii\helpers\Url::to(['information/index'])?>">
+                    <i class="fa fa-info-circle"></i>
+                    <span>Інформація</span>
+                </a>
+            </li>
         </ul>
         <!-- /.sidebar-menu -->
     </section>
