@@ -6,13 +6,22 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+//        'log',
+        'debug'
+    ],
     'language' => 'uk',
     'defaultRoute' => 'main/index',
     'layout' => 'admin',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+    ],
+    'modules' => [
+        'debug' => [
+            'class' => 'yii\debug\Module',
+            'allowedIPs' => ['*']
+        ]
     ],
     'components' => [
         'formatter' => [
@@ -52,14 +61,13 @@ $config = [
             ],
         ],
         'db' => $db,
-
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        'siteURL' => 'http://nuts-city.yh-web.space'
+        'siteURL' => 'https://nuts-city.yh-web.space'
     ],
     'params' => $params,
 ];
@@ -70,7 +78,8 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+//        'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*']
     ];
 
     $config['bootstrap'][] = 'gii';
@@ -78,6 +87,7 @@ if (YII_ENV_DEV) {
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*']
     ];
 }
 

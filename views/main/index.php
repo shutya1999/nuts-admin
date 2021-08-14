@@ -48,5 +48,36 @@ $this->params['breadcrumbs'][] = $this->title;
             </a>
         </div>
     </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-purple">
+            <div class="inner">
+                <h3><?= $clients ?></h3>
+                <p>Користувачів</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-users"></i>
+            </div>
+            <a href="<?= \yii\helpers\Url::to(['clients/index']) ?>" class="small-box-footer">
+                Детальніше <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-purple">
+            <div class="inner">
+                <h3><?= $reviews ?></h3>
+                <p>Відгуків</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-star-half-o"></i>
+            </div>
+            <a href="<?= \yii\helpers\Url::to(['review/index']) ?>" class="small-box-footer">
+                Детальніше <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
 </div>
 

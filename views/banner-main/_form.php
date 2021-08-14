@@ -68,6 +68,7 @@ use kartik\file\FileInput;
         ]
     ])->label("Зображення для телефонів * (365 х 400)"); ?>
 
+    <?= $form->field($model, 'link')->textInput()?>
 
     <div class="form-group">
         <?= Html::submitButton('Зберегти', ['class' => 'btn btn-success']) ?>

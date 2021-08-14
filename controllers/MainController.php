@@ -10,8 +10,10 @@ namespace app\controllers;
 
 
 use app\models\Category;
+use app\models\Clients;
 use app\models\Order;
 use app\models\Product;
+use app\models\Reviews;
 
 class MainController extends AppAdminController
 {
@@ -19,7 +21,9 @@ class MainController extends AppAdminController
         $orders = Order::find()->count();
         $products = Product::find()->count();
         $categories = Category::find()->count();
+        $clients = Clients::find()->count();
+        $reviews = Reviews::find()->count();
 
-        return $this->render("index", compact(['orders', 'products', 'categories']));
+        return $this->render("index", compact(['orders', 'products', 'categories', 'clients', 'reviews']));
     }
 }

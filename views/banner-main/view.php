@@ -56,6 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             ['width' => '200px']);
                                     },
                                 ],
+                                'link'
                             ],
                         ]) ?>
 

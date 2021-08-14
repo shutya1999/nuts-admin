@@ -7,6 +7,12 @@ use kartik\file\FileInput;
 use yii\helpers\Url;
 use yii\web\View;
 
+
+//$this->registerJsFile("@web/js/product.js");
+
+$this->registerJsFile('@web/js/product.js', ['depends' => \app\assets\AppAsset::class]);
+
+
 /* @var $this yii\web\View */
 /* @var $model app\models\Product */
 /* @var $form yii\widgets\ActiveForm */

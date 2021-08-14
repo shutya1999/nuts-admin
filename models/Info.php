@@ -35,7 +35,7 @@ class Info extends \yii\db\ActiveRecord
         return [
             [['phone1', 'phone2'], 'required'],
             [['phone1', 'phone2', 'email'], 'string', 'max' => 45],
-            [['viber', 'telegram', 'instagram', 'facebook', 'address'], 'string', 'max' => 255],
+            [['viber', 'telegram', 'instagram', 'facebook', 'address', 'maps'], 'string', 'max' => 255],
         ];
     }
 
@@ -53,6 +53,7 @@ class Info extends \yii\db\ActiveRecord
             'instagram' => 'Instagram',
             'facebook' => 'Facebook',
             'address' => 'Адреса',
+            'maps' => 'Посилання на Google Maps',
             'email' => 'E-mail',
         ];
     }

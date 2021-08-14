@@ -2,18 +2,19 @@
 
 namespace app\controllers;
 
+use app\models\Product;
 use Yii;
-use app\models\BannerMain;
-use yii\data\ActiveDataProvider;
+use app\models\Reviews;
+use app\models\ReviewSearch;
 use app\controllers\AppAdminController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\helpers\Json;
+use yii\data\ActiveDataProvider;
 
 /**
- * BannerMainController implements the CRUD actions for BannerMain model.
+ * ReviewController implements the CRUD actions for Reviews model.
  */
-class BannerMainController extends AppAdminController
+class ReviewController extends AppAdminController
 {
     /**
      * {@inheritdoc}
@@ -31,22 +32,33 @@ class BannerMainController extends AppAdminController
     }
 
     /**
-     * Lists all BannerMain models.
+     * Lists all Reviews models.
      * @return mixed
      */
     public function actionIndex()
     {
+        $searchModel = new ReviewSearch();
+
         $dataProvider = new ActiveDataProvider([
-            'query' => BannerMain::find(),
+            'query' => Reviews::find(),
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC
+                ]
+            ]
         ]);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single BannerMain model.
+     * Displays a single Reviews model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -59,13 +71,13 @@ class BannerMainController extends AppAdminController
     }
 
     /**
-     * Creates a new BannerMain model.
+     * Creates a new Reviews model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new BannerMain();
+        $model = new Reviews();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -77,7 +89,7 @@ class BannerMainController extends AppAdminController
     }
 
     /**
-     * Updates an existing BannerMain model.
+     * Updates an existing Reviews model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -88,6 +100,7 @@ class BannerMainController extends AppAdminController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->updateRating($model->product_id);
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -97,7 +110,7 @@ class BannerMainController extends AppAdminController
     }
 
     /**
-     * Deletes an existing BannerMain model.
+     * Deletes an existing Reviews model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -105,80 +118,36 @@ class BannerMainController extends AppAdminController
      */
     public function actionDelete($id)
     {
-        $slides = $this->findModel($id);
+        $product_id = $this->findModel($id)->product_id;
 
-//        echo "Jopa";
-//        echo "<pre>";
-//        var_dump($slides);
+        $this->findModel($id)->delete();
 
-        $dir = '/www/nuts-city.yh-web.space/web/img/banner-main/';
-
-        if (ftp_delete($this->connectFTP(), $dir . $slides->desktop) &&
-            ftp_delete($this->connectFTP(), $dir . $slides->tablet) &&
-            ftp_delete($this->connectFTP(), $dir . $slides->mobile)){
-            $this->findModel($id)->delete();
-            Yii::$app->session->setFlash('success', 'Банер видалено');
-        }else{
-            Yii::$app->session->setFlash('error', 'Виникла помилка при видаленні банеру');
-        }
+        $this->updateRating($product_id);
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the BannerMain model based on its primary key value.
+     * Finds the Reviews model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return BannerMain the loaded model
+     * @return Reviews the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = BannerMain::findOne($id)) !== null) {
+        if (($model = Reviews::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function connectFTP(){
-        $ftp_server = 'leaf.cityhost.com.ua';
-        $ftp_user_name = 'ch2e38aa18';
-        $ftp_user_pass = 'a9c3ec2cc8';
-        $conn_id = ftp_connect($ftp_server);
-        $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+    public function updateRating($product_id){
+        $product = Product::findOne($product_id);
 
-//        echo $login_result;
+        $product->rating = Reviews::find()->where(['product_id' => $product_id])->average('rating');
 
-        return $conn_id;
-    }
-
-    public function delPhoto($file){
-        $tmp = '/www/nuts-city.yh-web.space/web/img/banner-main/' . $file;
-        ftp_delete($this->connectFTP(), $tmp);
-    }
-
-    public function actionDelImg($file, $id){
-        $dir = '/www/nuts-city.yh-web.space/web/img/banner-main/' . $file;
-
-        $conn_id = $this->connectFTP();
-        if (ftp_delete($conn_id, $dir)){
-            $banner = BannerMain::findOne($id);
-
-            if ($banner->desktop == $file){
-                $banner->desktop = null;
-            }elseif($banner->tablet == $file){
-                $banner->tablet = null;
-            }elseif($banner->mobile == $file){
-                $banner->mobile = null;
-            }
-
-            $banner->save();
-
-            return Json::encode('success');
-        }else{
-            return Json::encode('Error');
-        }
-
+        $product->save();
     }
 }

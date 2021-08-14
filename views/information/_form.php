@@ -15,6 +15,7 @@ use mihaildev\ckeditor\CKEditor;
     <?= $form->field($model, 'instagram')->textInput() ?>
     <?= $form->field($model, 'facebook')->textInput() ?>
     <?= $form->field($model, 'address')->textInput() ?>
+    <?= $form->field($model, 'maps')->textInput() ?>
     <?= $form->field($model, 'email')->textInput() ?>
 
 

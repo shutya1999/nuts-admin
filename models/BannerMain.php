@@ -30,7 +30,7 @@ class BannerMain extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['desktop', 'tablet', 'mobile'], 'string', 'max' => 45],
+            [['desktop', 'tablet', 'mobile', 'link'], 'string', 'max' => 45],
         ];
     }
 
@@ -41,9 +41,10 @@ class BannerMain extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'desktop' => "Комп'ютер",
-            'tablet' => 'Планшет',
-            'mobile' => 'Телефон',
+            'desktop'   => "Комп'ютер",
+            'tablet'    => 'Планшет',
+            'mobile'    => 'Телефон',
+            'link'      => 'Посилання'
         ];
     }
 
